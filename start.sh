@@ -49,12 +49,17 @@ NODE_OPTIONS="--max-old-space-size=512" npm run build
 echo "🧹 Cleaning up..."
 rm -rf .next/cache/webpack 2>/dev/null || true
 
-# ── Step 5: Stop existing instance if running ──
+# ── Step 5: Copy static assets into standalone (required for standalone mode) ──
+echo "📂 Copying static assets into standalone output..."
+cp -r public .next/standalone/public
+cp -r .next/static .next/standalone/.next/static
+
+# ── Step 6: Stop existing instance if running ──
 pm2 delete "$APP_NAME" 2>/dev/null || true
 
-# ── Step 6: Start with PM2 (memory-limited, auto-restart) ──
+# ── Step 7: Start with PM2 (memory-limited, auto-restart) ──
 echo "✅ Starting RideNEarn on port $PORT..."
-pm2 start node \
+PORT=$PORT pm2 start node \
   --name "$APP_NAME" \
   --max-memory-restart "400M" \
   --node-args="--max-old-space-size=384" \
